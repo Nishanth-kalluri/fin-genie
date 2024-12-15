@@ -1,0 +1,21 @@
+# Ignore the virtual environment
+venv/
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore data files (optional, depending on whether you want to track data in Git)
+data/*.csv
+data/*.xlsx
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore IDE-specific files
+.vscode/
+*.swp
+
+# Ignore system files
+.DS_Store
+Thumbs.db
