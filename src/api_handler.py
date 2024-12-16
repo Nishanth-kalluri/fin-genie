@@ -1,38 +1,31 @@
 from flask import Flask, request, jsonify
-from src.fetch_data import fetch_stock_data
+from src.fetch_data import fetch_nifty_data
 from src.calculate_metrics import calculate_metrics
 from src.screen_stocks import StockScreener
 
-app = Flask(__name__)
+def create_app():
+    """Create and configure the Flask app."""
+    app = Flask(__name__)
 
-class APIHandler:
-    @staticmethod
     @app.route('/screen', methods=['POST'])
-    def screen_stocks():
+    def screen_stocks_api():
         try:
             data = request.json
-            
-            # Validate input
-            required_fields = ['tickers', 'investment_amount', 'risk_tolerance', 'time_horizon']
-            for field in required_fields:
-                if field not in data:
-                    return jsonify({"error": f"Missing {field}"}), 400
-
-            tickers = data['tickers']
             investment_amount = data['investment_amount']
             risk_tolerance = data['risk_tolerance']
-            time_horizon = data['time_horizon']
+            investment_period = data['investment_period']
+            index = data.get('index', 'nifty50')  # Default to Nifty 50 if not specified
 
-            # Fetch and process data
-            prices, fundamentals = fetch_stock_data(tickers, time_horizon)
-            metrics_df = calculate_metrics(prices, fundamentals)
+            # Fetch stock data
+            prices, fundamentals = fetch_nifty_data(index, '1y')
+            metrics_df = calculate_metrics(prices, fundamentals, investment_period)
 
-            # Screen stocks
+            # Screen stocks based on user preferences
             result = StockScreener.screen_stocks(
-                metrics_df, 
-                investment_amount, 
-                risk_tolerance, 
-                time_horizon
+                metrics_df,
+                investment_amount,
+                risk_tolerance,
+                investment_period
             )
 
             return jsonify(result)
@@ -40,5 +33,4 @@ class APIHandler:
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
-def create_app():
     return app
