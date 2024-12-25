@@ -1,21 +1,37 @@
-import yfinance as yf
 import pandas as pd
-from src.nifty_data import get_nifty_tickers  # Changed from get_nifty50_tickers
+import yfinance as yf
 
-def fetch_stock_data(tickers, period='1y'):
-    """Fetch historical stock prices and fundamental data."""
-    data = {}
-    fundamentals = {}
+class FetchData:
+    def __init__(self, tickers):
+        self.tickers = tickers
 
-    for ticker in tickers:
-        stock = yf.Ticker(ticker)
-        data[ticker] = stock.history(period=period)
-        fundamentals[ticker] = stock.info
+    def fetch_price_data(self):
+        df = yf.download(self.tickers, period="max")["Adj Close"]
+        return df.dropna()
 
-    prices = pd.DataFrame({ticker: df['Close'] for ticker, df in data.items()})
-    return prices, fundamentals
-
-def fetch_nifty_data(index='nifty50', period='1y'):  # Changed from fetch_nifty50_data
-    """Fetch data for Nifty stocks."""
-    tickers = get_nifty_tickers(index)  # Pass the index parameter
-    return fetch_stock_data(tickers, period)
+    def fetch_fundamental_data(self):
+        fundamental_data = {}
+        for ticker in self.tickers:
+            ticker_obj = yf.Ticker(ticker)
+            info = ticker_obj.info
+            fundamental_data[ticker] = {
+                "trailingPE": info.get("trailingPE"),
+                "forwardPE": info.get("forwardPE"),
+                "marketCap": info.get("marketCap"),
+                "priceToBook": info.get("priceToBook"),
+                "dividendYield": info.get("dividendYield"),
+                "trailingEps": info.get("trailingEps"),
+                "forwardEps": info.get("forwardEps"),
+                "bookValue": info.get("bookValue"),
+                "debtToEquity": info.get("debtToEquity"),
+                "returnOnEquity": info.get("returnOnEquity"),
+                "freeCashflow": info.get("freeCashflow"),
+                "operatingCashflow": info.get("operatingCashflow"),
+                "totalCash": info.get("totalCash"),
+                "totalDebt": info.get("totalDebt"),
+                "currentRatio": info.get("currentRatio"),
+                "quickRatio": info.get("quickRatio"),
+                "recommendationMean": info.get("recommendationMean"),
+                "targetMeanPrice": info.get("targetMeanPrice")
+            }
+        return pd.DataFrame.from_dict(fundamental_data, orient='index')

@@ -1,6 +1,6 @@
 import yfinance as yf
 
-def get_nifty_tickers(index='nifty50'):
+def get_nifty_tickers(index):
     """Return Nifty 50 or Nifty 100 tickers."""
     if index == 'nifty50':
         return [
